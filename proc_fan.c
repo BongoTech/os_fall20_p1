@@ -34,15 +34,20 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    //The number_of_children processes that this program will spawn.
-    //Must be >0. 
-    int number_of_children;
-    int option;
+    //The maximum number of children to execute at one time.
+    //Must satisfy 0 < pr_limit <= 20.
+    //20 was chosen arbitrarily to prevent too many processes
+    //on the system at one time.
+    int pr_limit;
 
+    //Current number of active children.
+    int pr_count = 0;
+
+    int option;
     while ( (option = getopt(argc, argv, ":n:h")) != -1 ) {
         switch ( option ) {
             case 'n':
-                number_of_children = atoi(optarg);
+                pr_limit = atoi(optarg);
                 break;
             case ':':
                 fprintf(stderr, "%s: Error: Missing argument value.\n", argv[0]);
@@ -56,15 +61,15 @@ int main(int argc, char *argv[])
         }
     }
 
-    if ( number_of_children <= 0 ) {
-        fprintf(stderr, "%s: Error: number_of_children cannot be negative.\n", argv[0]);
+    if ( pr_limit <= 0 || pr_limit > 20 ) {
+        fprintf(stderr, "%s: Error: pr_limit must satisfy 0 < pr_limit <= 20.\n", argv[0]);
         return 1;
     }
     //END: Command line processing.
     //**********************************************************************
 
     //Test print.
-    printf("The number_of_children is %d.\n", number_of_children);
+    printf("The pr_limit is %d.\n", pr_limit);
 
     return 0;
 }
