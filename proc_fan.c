@@ -20,7 +20,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 #include <unistd.h>
+
+#define MAX_CANON 64
 
 //Function Prototypes
 int help_message(char*);
@@ -67,6 +70,33 @@ int main(int argc, char *argv[])
     }
     //END: Command line processing.
     //**********************************************************************
+    //BEGIN: Generating children.
+
+    pid_t childpid;
+    char buffer[MAX_CANON];
+
+    //Pull one line from stdin.
+    if ( fgets(buffer, MAX_CANON, stdin) != NULL ) {
+
+        //Setting up the argument vector based on lines from stdin
+        char arg_one[16], arg_two[16], arg_three[16];
+        sscanf(buffer, "%s %s %s", arg_one, arg_two, arg_three);
+        char *arg_vector[] = {"./testsim", arg_two, arg_three, NULL};
+        
+        //Create one child to do the task defined by argument vector.
+        if (( childpid = fork() ) < 0 ) {
+            fprintf(stderr, "%s: Error: Failed to fork child.\n", argv[0]);
+            return 1;
+        } else if ( childpid == 0 ) {
+            execv(arg_vector[0], arg_vector);
+        }
+    }
+    //END: Generating children.
+    //**********************************************************************
+    //BEGIN: Finishing up.
+
+    //Wait for the child to complete.
+    wait(NULL);
 
     //Test print.
     printf("The pr_limit is %d.\n", pr_limit);
