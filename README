@@ -15,7 +15,7 @@ TO COMPILE:
             OPTION ONE: Use supplied makefile. Type make.
             OPTION TWO: Use gcc compiler.
             gcc -Wall -g proc_fan.c -o proc_fan
-            gcc -Wall -g testsim.c - o testsim
+            gcc -Wall -g testsim.c -o testsim
 
 TO RUN:
             ./proc_fan -n [int] < [file]
