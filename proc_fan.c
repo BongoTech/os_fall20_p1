@@ -74,32 +74,58 @@ int main(int argc, char *argv[])
 
     pid_t childpid;
     char buffer[MAX_CANON];
+    int there_is_input = 1;
 
-    //Pull one line from stdin.
-    if ( fgets(buffer, MAX_CANON, stdin) != NULL ) {
+    do {
 
-        //Setting up the argument vector based on lines from stdin
-        char arg_one[16], arg_two[16], arg_three[16];
-        sscanf(buffer, "%s %s %s", arg_one, arg_two, arg_three);
-        char *arg_vector[] = {"./testsim", arg_two, arg_three, NULL};
-        
-        //Create one child to do the task defined by argument vector.
-        if (( childpid = fork() ) < 0 ) {
-            fprintf(stderr, "%s: Error: Failed to fork child.\n", argv[0]);
-            return 1;
-        } else if ( childpid == 0 ) {
-            execv(arg_vector[0], arg_vector);
+        //5a)
+        //If we're at the max concurrent process count,
+        //wait for someone to finish before continuing.
+        if ( pr_count == pr_limit ) {
+            wait(NULL);
+            pr_count--;
         }
-    }
+
+        //5b)
+        //Pull one line from stdin.
+        if ( fgets(buffer, MAX_CANON, stdin) != NULL ) {
+
+            //Setting up the argument vector based on lines from stdin
+            char arg_one[16], arg_two[16], arg_three[16];
+            sscanf(buffer, "%s %s %s", arg_one, arg_two, arg_three);
+            char *arg_vector[] = {"./testsim", arg_two, arg_three, NULL};
+        
+            //Create one child to do the task defined by argument vector.
+            if (( childpid = fork() ) < 0 ) {
+                fprintf(stderr, "%s: Error: Failed to fork child.\n", argv[0]);
+                return 1;
+            } else if ( childpid == 0 ) {
+                execv(arg_vector[0], arg_vector);
+            } else {
+                //5c)
+                pr_count++;
+            }
+        } else {
+            there_is_input = 0;
+        }
+        
+        //5d)
+        //Look to see if any children are done right now,
+        //if not move on.
+        //if so, decrement process count.
+        if ( waitpid(-1, NULL, WNOHANG) > 0 ) {
+            pr_count--;
+        }
+    
+    } while ( there_is_input );
     //END: Generating children.
     //**********************************************************************
     //BEGIN: Finishing up.
 
-    //Wait for the child to complete.
-    wait(NULL);
+    //Wait for the children to complete.
+    while ( wait(NULL) > 0 );
 
-    //Test print.
-    printf("The pr_limit is %d.\n", pr_limit);
+    printf("Done!\n");
 
     return 0;
 }
