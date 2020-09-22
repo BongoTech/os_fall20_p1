@@ -1,0 +1,61 @@
+PROCESS FAN:    proc_fan
+
+DESCRIPTION:
+    proc_fan completes exercise 3.9 in Unix Systems Progamming by
+            Robbins and Robbins. 
+    
+            It reads each line from stdin as a 'task' to be executed.
+            It forks and executes a sub program to complete this task.
+            It will fork up to n concurrent tasks based on its 
+            singular command line argument n.
+
+FILES: proc_fan.c testsim.c
+
+TO COMPILE:
+            OPTION ONE: Use supplied makefile. Type make.
+            OPTION TWO: Use gcc compiler.
+            gcc -Wall -g proc_fan.c -o proc_fan
+            gcc -Wall -g testsim.c - o testsim
+
+TO RUN:
+            ./proc_fan -n [int] < [file]
+            OR
+            ./proc_fan -h
+
+            Where [int] is some integer literal that falls
+            between 0 < [int] <= 20.
+            and [file] is some file containing a list of tasks
+            in the following format:
+            
+            testsim x y
+            
+            testsim is the name of the sub programs executable,
+            x is the time testsim will sleep,
+            y is the number of times testsim will repeat this sleep.
+
+            The file can contain any number of these commands, but may
+            have only one command per line.
+
+VERSION CONTROL:
+            This project uses git and github to keep track of versions.
+
+            To see the list of commits, Type: git log
+
+NOTES:
+            * There are no default arguments for n, a value must be supplied.
+            
+            * I have chosen to not allow n to be greater than 20 to prevent
+                too many children from executing at one time. This number
+                is arbitrary and can be changed.
+        
+            * I did not use perror in this assignment because I find it 
+                limiting in the formatting of error output. Instead I used
+                fprintf to stderr and included errno with my own custom message.
+
+            * You must supply a file at the execution of proc_fan via piping. This is because
+                fgets() only stops reading lines from stdin upon EOF. Without EOF
+                at the end of a file, fgets() will prompt you indefinitely for more
+                tasks.
+
+                eg. Wrong: ./proc_fan -n 4
+                eg. Right: ./proc_fan -n 4 < somefile

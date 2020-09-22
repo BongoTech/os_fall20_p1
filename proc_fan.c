@@ -2,7 +2,7 @@
 //Program Name: proc_fan
 //Author: Cory Mckiel
 //Date Created: September 21, 2020
-//Last Modified: Septermber 21, 2020
+//Last Modified: Septermber 22, 2020
 //Program Description:
 //      Completing Exercise 3.9 on page 88 of Unix systems programming
 //      by Robbins and Robbins for OS 4760 Fall 2020 project 1.
@@ -18,8 +18,10 @@
 //              Type: gcc -Wall -g proc_fan.c -o proc_fan
 //**********************************************************************
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -33,7 +35,7 @@ int main(int argc, char *argv[])
     //BEGIN: Command line processing.
     //**********************************************************************
     if ( argc < 2 ) {
-        fprintf(stderr, "%s: Error: Invalid argument length.\n", argv[0]);
+        fprintf(stderr, "%s: Error: Invalid argument length.\n%s\n", argv[0], strerror(errno));
         return 1;
     }
 
@@ -53,19 +55,19 @@ int main(int argc, char *argv[])
                 pr_limit = atoi(optarg);
                 break;
             case ':':
-                fprintf(stderr, "%s: Error: Missing argument value.\n", argv[0]);
+                fprintf(stderr, "%s: Error: Missing argument value.\n%s\n", argv[0], strerror(errno));
                 return 1;
             case 'h':
                 help_message(argv[0]);
                 return 0;
             default:
-                fprintf(stderr, "%s: Error: Unknown argument.\n", argv[0]);
+                fprintf(stderr, "%s: Error: Unknown argument.\n%s\n", argv[0], strerror(errno));
                 return 1;
         }
     }
 
     if ( pr_limit <= 0 || pr_limit > 20 ) {
-        fprintf(stderr, "%s: Error: pr_limit must satisfy 0 < pr_limit <= 20.\n", argv[0]);
+        fprintf(stderr, "%s: Error: pr_limit must satisfy 0 < pr_limit <= 20.\n%s\n", argv[0], strerror(errno));
         return 1;
     }
     //END: Command line processing.
@@ -97,7 +99,7 @@ int main(int argc, char *argv[])
         
             //Create one child to do the task defined by argument vector.
             if (( childpid = fork() ) < 0 ) {
-                fprintf(stderr, "%s: Error: Failed to fork child.\n", argv[0]);
+                fprintf(stderr, "%s: Error: Failed to fork child.\n%s\n", argv[0], strerror(errno));
                 return 1;
             } else if ( childpid == 0 ) {
                 execv(arg_vector[0], arg_vector);
